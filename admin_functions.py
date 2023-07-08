@@ -16,13 +16,12 @@ from reportlab.lib.utils import ImageReader
 
 # PDF editing
 import io
-from PyPDF2 import PdfWriter, PdfReader
+from PyPDF2 import PdfReader
 
 # Google Sheets API
 import google.auth
 from google.auth.transport.requests import Request
 import googleapiclient.discovery
-import requests
 
 # Email imports
 import smtplib
@@ -52,7 +51,7 @@ def make_daily_plan_from_img():
 
     # Put image on canvas and save
     c = canvas.Canvas(k.SAVE_FILE_NAME, pagesize=A4)
-    c.drawImage(image, k.MARGINS / 2, height_margins, width=new_width, height=new_height)
+    c.drawImage(image, k.MARGINS / 2, height_margins-10, width=new_width, height=new_height)
     c.save()
 
 
@@ -60,42 +59,34 @@ def make_daily_plan_from_img():
 
 # Create canvas and final pdf
 def start_edit():
-    # Get the blank daily plan as a pdf single page
-    pdf = PdfReader(open('files/daily_plan.pdf', 'rb'))
-    blank_plan_page = pdf.pages[0]
-
-    # Create new pdf page to put canvas and pdf on
-    new_page = PdfWriter()
-
     # In-memory stream for the canvas
     temp_stream = io.BytesIO()
 
     # Create canvas to write on
     can = canvas.Canvas(temp_stream)
 
-    # Set font and draw
-    can.setFont(k.FONT, k.SIZE)
+    # Set font and size as normal
+    can.setFont(k.FONT, k.SIZE_12)
 
     # Return variables
-    return new_page, blank_plan_page, can, temp_stream
+    return can, temp_stream
 
 
-def end_edit(new_page, blank_plan_page, can, temp_stream):
+def end_edit(can, temp_stream):
+    # Get the blank daily plan as a pdf single page
+    pdf = PdfReader(open('files/daily_plan.pdf', 'rb'))
+    daily_plan_blank = pdf.pages[0]
+
     # Save canvas content
     can.save()
-
-    # Seek to the beginning of the stream
     temp_stream.seek(0)
+    temp_pdf = PdfReader(temp_stream)
+    temp_page = temp_pdf.pages[0]
 
-    # Create content stream to merge
-    content_stream = PdfReader(temp_stream).pages[0]
-    blank_plan_page.merge_page(content_stream)
+    # Add stream to pdf
+    daily_plan_blank.merge_page(temp_page)
 
-    new_page.add_page(blank_plan_page)
-
-    with open('practice.pdf', 'wb') as file:
-        new_page.write(file)
-
+    return daily_plan_blank
 
 # -----------------------------------------------------------------
 
@@ -156,7 +147,7 @@ def fetch_data(client, spreadsheet_id, sheet):
 # -----------------------------------------------------------------
 
 # Email with pdf attached to gmail
-def email():
+def email(pdf):
     # Set up the MIME
     message = MIMEMultipart()
     message['From'] = k.MY_EMAIL
@@ -166,19 +157,22 @@ def email():
     # The body and attachment
     message.attach(MIMEText(k.EMAIL_BODY, 'plain'))
 
-    with open(k.EMAIL_FILE_NAME, 'rb') as attach_file:
-        payload = MIMEBase('application', 'octate-stream')
-        payload.set_payload(attach_file.read())
-        encoders.encode_base64(payload)
+    # Extract pdf content to be read as a stream
+    pdf_stream = io.BytesIO()
+    pdf.write(pdf_stream)
+    pdf_stream.seek(0)
 
-        # Add payload header with filename
-        payload.add_header('Content-Disposition', 'attachment', filename=k.EMAIL_FILE_NAME)
-        message.attach(payload)
+    # Create attachment from pdf content
+    attachment = MIMEBase('application', 'pdf')
+    attachment.set_payload(pdf_stream.read())
+    encoders.encode_base64(attachment)
+    attachment.add_header('Content-Disposition', 'attachment', filename=k.EMAIL_FILE_NAME)
+    message.attach(attachment)
 
-        # Create SMTP session
-        session = smtplib.SMTP('smtp.gmail.com', 587)
-        session.starttls()
-        session.login(k.MY_EMAIL, k.PASSWORD)
-        text = message.as_string()
-        session.sendmail(k.MY_EMAIL, k.RECEIVER_EMAIL, text)
-        session.quit()
+    # Create SMTP session
+    session = smtplib.SMTP('smtp.gmail.com', 587)
+    session.starttls()
+    session.login(k.MY_EMAIL, k.PASSWORD)
+    text = message.as_string()
+    session.sendmail(k.MY_EMAIL, k.RECEIVER_EMAIL, text)
+    session.quit()

@@ -1,27 +1,23 @@
-# This is the code that will run weekly
-import k
-# Generate dates to print (next week classes)
-
-# Have current classes variables - which ones to print
-# How to get all info into one place: dict? So only prints those
-
-# Call master loop
-
 from admin_functions import *
 from klass import Klass
+from PyPDF2 import PdfWriter
 
-# Assign all data to class practice
-B2c = Klass(k.CLASSES[0])
+dates = ["7/10/2023", "7/11/2023", "7/12/2023", "7/13/2023", "7/14/2023"]
 
 # Create client
 client = create_client_service_account()
 
+# Output multipage file
+final_pdf = PdfWriter()
+
+# Initialize class
+B2c = Klass(k.CLASSES[0])
 B2c.set_up(client)
 
-# Try to add the values to the pdf
-new, blank, can, stream = start_edit()
+# Puts values of class days, books, and nt_books into class
+B2c.fetch_books(client, dates)
 
-can.drawString(100, 100, "One more step")
+final_pdf = B2c.write_curriculum(final_pdf)
 
-# End the edit and generate the pdf
-end_edit(new, blank, can, stream)
+with open("practice.pdf", "wb") as file:
+    final_pdf.write(file)
