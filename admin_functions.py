@@ -1,15 +1,30 @@
 # Administrative functions
 
-# - Creates pdf from image
-# - Creates canvas and final pdf
-# - Merge pdf
-# - API to get data
-# - Email with pdf attached
+# Sections
+
+# Imaging and PDF generation
+# 1 - make_daily_plan_from_img      Creates pdf from image with margins
+
+# Canvas and content management
+# 1 - start_edit                    Creates canvas and content stream to write on
+# 2 - end_edit                      Merges written data onto blank plan page, returns single pdf page
+
+# API management
+# 1 - create_client_service_account Creates client for API calls
+# 2 - fetch_data                    Inputs of client, spreadsheet, sheet, returns all data inside
+
+# Data generation
+# 1 - get_dates                     Takes optional inputs of start and end date, returns dates between, email file name
+# 2 - get_classes                   Takes a string of classes, returns dicts in classes array from k data that match
+
+# Email
+# 1 - email                         Input a pdf, sends email with input pdf attached
 
 # -----------------------------------------------------------------
 
 # Imports
 import k
+from datetime import datetime, timedelta
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
@@ -66,7 +81,7 @@ def start_edit():
     can = canvas.Canvas(temp_stream)
 
     # Set font and size as normal
-    can.setFont(k.FONT, k.SIZE_12)
+    can.setFont(k.FONT, k.DEFAULT_SIZE)
 
     # Return variables
     return can, temp_stream
@@ -88,23 +103,10 @@ def end_edit(can, temp_stream):
 
     return daily_plan_blank
 
-# -----------------------------------------------------------------
-
-# Merge new pdf file into finished pdf
-
 
 # -----------------------------------------------------------------
 
-# API
-
-# Create client
-
-# UNUSED Use API key - couldn't get it to work
-def create_client():
-    return googleapiclient.discovery.build('sheets', 'v4', developerKey="AIzaSyBgq93ghAYXdjXnnUos7dDCeOGxN_YEA4A")
-
-
-# Use service account for API call - works, so it's used
+# Create client using service account for API call
 def create_client_service_account():
     # Load credentials from json file
     credentials, project = google.auth.load_credentials_from_file("json/google_api_credentials.json")
@@ -121,15 +123,7 @@ def create_client_service_account():
     return sheets_service
 
 
-# UNUSED function to try to get the range to avoid getting unwanted data
-def get_range(client, spreadsheet_id, sheet):
-    sheet_properties = client.spreadsheets().get(spreadsheetId=spreadsheet_id, ranges=sheet).execute()
-    last_row = sheet_properties['gridProperties']['rowCount']
-    last_col = sheet_properties['gridProperties']['columnCount']
-    return f"A1:{chr(64 + last_col)}{last_row}"
-
-
-# Fetch
+# Fetch all data from inputted spreadsheet and sheet
 def fetch_data(client, spreadsheet_id, sheet):
     where = f"{sheet}!A1:ZZ"
     response = client.spreadsheets().values().get(
@@ -146,8 +140,53 @@ def fetch_data(client, spreadsheet_id, sheet):
 
 # -----------------------------------------------------------------
 
+# Gets all dates from start date to number of days in the future
+def get_dates(start_date=datetime.now().date(), end_date=(datetime.now() + timedelta(days=5)).date()):
+    # If they get passed in manually, they will be strings, so switch them to dates
+    if type(start_date) == str:
+        start_date = datetime.strptime(start_date, "%m/%d/%Y").date()   # type: ignore
+    if type(end_date) == str:
+        end_date = datetime.strptime(end_date, "%m/%d/%Y").date()       # type: ignore
+
+    # Create file name to email including dates
+    sm = start_date.month
+    sd = start_date.day
+    sy = start_date.year
+    em = end_date.month
+    ed = end_date.day
+    ey = end_date.year
+    file_name = f"daily_plans_{sm}.{sd}.{sy}-{em}.{ed}.{ey}"
+
+    # Initialize dates array to store every date
+    dates = []
+
+    # Generate and store all days as strings between days including end date
+    while start_date <= end_date:
+        day = start_date.strftime("%-m/%-d/%Y")
+        dates.append(day)
+        start_date += timedelta(days=1)
+
+    return dates, file_name
+
+
+# Return classes to be used manually
+def get_classes(classes):
+    # Initialize return of classes
+    choose_classes = []
+
+    # Edit classes to write curriculum plans for from given input
+    for name in classes:
+        chosen_class = [group for group in k.CLASSES if group[k.NAME] == name]
+        # There will only be one match, so should put [0] to get the value, so it's not an array
+        choose_classes.append(chosen_class[0])
+
+    return choose_classes
+
+
+# -----------------------------------------------------------------
+
 # Email with pdf attached to gmail
-def email(pdf):
+def email(pdf, email_file_name):
     # Set up the MIME
     message = MIMEMultipart()
     message['From'] = k.MY_EMAIL
@@ -166,7 +205,7 @@ def email(pdf):
     attachment = MIMEBase('application', 'pdf')
     attachment.set_payload(pdf_stream.read())
     encoders.encode_base64(attachment)
-    attachment.add_header('Content-Disposition', 'attachment', filename=k.EMAIL_FILE_NAME)
+    attachment.add_header('Content-Disposition', 'attachment', filename=email_file_name)
     message.attach(attachment)
 
     # Create SMTP session
