@@ -243,6 +243,10 @@ class Klass:
         # Get data matching the dates to print daily plans for
         filtered_data = [row for row in data if row[0] in dates]
 
+        # If no data
+        if len(filtered_data) == 0:
+            return 1
+
         # Extra row for next times books
         next_row_index = data.index(filtered_data[len(filtered_data) - 1]) + 1
         filtered_data.append(data[next_row_index])
@@ -283,7 +287,7 @@ class Klass:
                 # Store value if not blank
                 if value != "":
                     # Exception for +WB - combine with last entry
-                    if column == "WB":
+                    if "WB" in column:
                         # noinspection PyUnboundLocalVariable
                         old_value = daily_books[last_column]    # last_column will only EVER be accessed after assigned
                         column = last_column + " + " + column
@@ -323,11 +327,11 @@ class Klass:
             if date in tests_df[k.TEST_DATE].values:
                 test = tests_df.loc[tests_df[k.TEST_DATE] == date, k.TEST].values[0]
             else:
-                test = "?"
+                test = ""
             if nt_date in tests_df[k.TEST_DATE].values:
                 nt_test = tests_df.loc[tests_df[k.TEST_DATE] == nt_date, k.TEST].values[0]
             else:
-                nt_test = "?"
+                nt_test = ""
             self.tests[date] = [test, nt_test]
 
         # Make dataframe for wcq

@@ -46,22 +46,27 @@ IMAGE = "image"
 # Spreadsheet IDs
 CLASSES = [
     {
-        NAME: "B2c",
-        ID: "1NALyxgKDzyHySViGBeQcW8_o5ORrd235XKdbkcrLzTQ",
+        NAME: "B1a",
+        ID: "1hd-OkgrCs7oPbhmr-xH9lpg8JdU04gBgGcEHjjYEK8w",
         IMAGE: "images/boxes/MWThF24.png"
     },
     {
-        NAME: "C4e",
+        NAME: "C1a",
+        ID: "1I3CQrZhLRUsufYOBz9hql3nECg6jiqxpZn33Y7IKz98",
+        IMAGE: "images/boxes/MWTh79.png"
+    },
+    {
+        NAME: "C3b",
+        ID: "1NALyxgKDzyHySViGBeQcW8_o5ORrd235XKdbkcrLzTQ",
+        IMAGE: "images/boxes/MWTh57.png"
+    },
+    {
+        NAME: "C5c",
         ID: "11IQLWtOu1GL-pgHgQGSOB-mRIX5-uTMjDTvT5bsrM8w",
         IMAGE: "images/boxes/TWF57.png"
     },
     {
-        NAME: "C5c",
-        ID: "1lq6XSUwLDggocUVSy28cik_Z5FhsGd37GNr6RKcB20c",
-        IMAGE: "images/boxes/MWTh57.png"
-    },
-    {
-        NAME: "KET",
+        NAME: "PET",
         ID: "1McKp2SA105FXeh-lWlG649w0X9MxM87iSSkLS7knp9s",
         IMAGE: "images/boxes/TF79.png"
     }
@@ -177,7 +182,7 @@ PROP = {
         NEW_LINE: 18
     },
     WCQ_PROP: {
-        LENGTH: 74,
+        LENGTH: 72,
         NEW_LINE: 10
     },
     BOOK_PROP: {

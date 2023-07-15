@@ -155,7 +155,7 @@ def get_dates(start_date=datetime.now().date(), end_date=(datetime.now() + timed
     em = end_date.month
     ed = end_date.day
     ey = end_date.year
-    file_name = f"daily_plans_{sm}.{sd}.{sy}-{em}.{ed}.{ey}"
+    file_name = f"daily_plans_{sm}.{sd}.{sy}-{em}.{ed}.{ey}.pdf"
 
     # Initialize dates array to store every date
     dates = []
