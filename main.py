@@ -57,6 +57,3 @@ def master_generate(manual_mode=False, start_date=None, end_date=None, choose_cl
 
     # Email final pdf
     email(pdf, file_name)
-
-
-master_generate(True, "8/7/2023", "8/11/2023")

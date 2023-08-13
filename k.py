@@ -61,7 +61,7 @@ CLASSES = [
         IMAGE: "images/boxes/MWTh57.png"
     },
     {
-        NAME: "C5c",
+        NAME: "C5b",
         ID: "11IQLWtOu1GL-pgHgQGSOB-mRIX5-uTMjDTvT5bsrM8w",
         IMAGE: "images/boxes/TWF57.png"
     },
@@ -175,14 +175,14 @@ LENGTH = "length"
 NEW_LINE = "new line"
 BIG_LENGTH = "big length"
 
-# Prop
+# Properties
 PROP = {
     TEST_PROP: {
-        LENGTH: 57,
+        LENGTH: 55,
         NEW_LINE: 18
     },
     WCQ_PROP: {
-        LENGTH: 72,
+        LENGTH: 70,
         NEW_LINE: 10
     },
     BOOK_PROP: {
