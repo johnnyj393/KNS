@@ -66,7 +66,7 @@ def make_daily_plan_from_img():
 
     # Put image on canvas and save
     c = canvas.Canvas(k.SAVE_FILE_NAME, pagesize=A4)
-    c.drawImage(image, k.MARGINS / 2, height_margins-10, width=new_width, height=new_height)
+    c.drawImage(image, k.MARGINS / 2, height_margins - 10, width=new_width, height=new_height)
     c.save()
 
 
@@ -141,12 +141,15 @@ def fetch_data(client, spreadsheet_id, sheet):
 # -----------------------------------------------------------------
 
 # Gets all dates from start date to number of days in the future
-def get_dates(start_date=datetime.now().date(), end_date=(datetime.now() + timedelta(days=5)).date()):
+def get_dates(
+        start_date=(datetime.now().date() + timedelta(days=7)),
+        end_date=(datetime.now() + timedelta(days=12)).date()
+):
     # If they get passed in manually, they will be strings, so switch them to dates
     if type(start_date) == str:
-        start_date = datetime.strptime(start_date, "%m/%d/%Y").date()   # type: ignore
+        start_date = datetime.strptime(start_date, "%m/%d/%Y").date()  # type: ignore
     if type(end_date) == str:
-        end_date = datetime.strptime(end_date, "%m/%d/%Y").date()       # type: ignore
+        end_date = datetime.strptime(end_date, "%m/%d/%Y").date()  # type: ignore
 
     # Create file name to email including dates
     sm = start_date.month

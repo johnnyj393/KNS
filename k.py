@@ -178,7 +178,7 @@ BIG_LENGTH = "big length"
 # Properties
 PROP = {
     TEST_PROP: {
-        LENGTH: 55,
+        LENGTH: 53,
         NEW_LINE: 18
     },
     WCQ_PROP: {

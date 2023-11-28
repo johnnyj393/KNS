@@ -57,3 +57,6 @@ def master_generate(manual_mode=False, start_date=None, end_date=None, choose_cl
 
     # Email final pdf
     email(pdf, file_name)
+
+master_generate(True, "12/4/2023", "12/8/2023", ["B1a"])
+
